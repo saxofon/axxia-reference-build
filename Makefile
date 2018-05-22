@@ -37,7 +37,7 @@ INTEL_REL=92d66730fba1fdc71d2548332c8ff57160e31b05
 LAYERS += $(TOP)/build/layers/meta-intel
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery12_linux4_12
+AXXIA_REL=snr_delivery12.1_linux4_12
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
@@ -45,7 +45,7 @@ ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
-AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/20180423-snr_delivery12/rdk_klm_src_*xz
+AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/20180514-snr_delivery12.1/rdk_klm_src_*xz
 endif
 
 MACHINE=axxiax86-64
