@@ -3,7 +3,6 @@
 # Author : Per Hallsmark <per.hallsmark@windriver.com>
 # Repo   : https://github.com/saxofon/axxia-reference-build
 #
-# Setup for SNR Delivery 11
 #
 
 TOP 		?= $(shell pwd)
