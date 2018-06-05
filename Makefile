@@ -17,10 +17,10 @@ endif
 RM = $(Q)rm -f
 
 POKY_URL = git://git.yoctoproject.org/poky.git
-POKY_REL = 5ba69a97ab5faa8f3866aaeab1d6eaa3cb8149ed
+POKY_REL = 9915e071bcadd7c4d5363a067c529889851d37a5
 
 OE_URL = https://github.com/openembedded/meta-openembedded.git
-OE_REL = a65c1acb1822966c3553de9fc98d8bb6be705c4e
+OE_REL = dacfa2b1920e285531bec55cd2f08743390aaf57
 LAYERS += $(TOP)/build/layers/meta-openembedded
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-oe
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-python
@@ -28,15 +28,15 @@ LAYERS += $(TOP)/build/layers/meta-openembedded/meta-networking
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-filesystems
 
 VIRT_URL = git://git.yoctoproject.org/meta-virtualization
-VIRT_REL = 4277759428e96605b8dbe95a43891e217ae8d399
+VIRT_REL = bd77388f31929f38e7d4cc9c711f0f83f563007e
 LAYERS += $(TOP)/build/layers/meta-virtualization
 
 INTEL_URL=git://git.yoctoproject.org/meta-intel
-INTEL_REL=92d66730fba1fdc71d2548332c8ff57160e31b05
+INTEL_REL=7e284b95b45c7ec5c5b5c8cb08122d3b470c0d63
 LAYERS += $(TOP)/build/layers/meta-intel
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery12.1_linux4_12
+AXXIA_REL=snr_delivery13_linux4_12
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
@@ -44,12 +44,10 @@ ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
-AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/20180514-snr_delivery12.1/rdk_klm_src_*xz
+AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/13/rdk_klm_src_*xz
 endif
 
 MACHINE=axxiax86-64
-
-DISTRO=intel-axxia
 
 IMAGE=axxia-image-sim
 
@@ -115,6 +113,9 @@ build/build: build $(LAYERS)
 		source poky/oe-init-build-env ; \
 		$(foreach layer, $(LAYERS), bitbake-layers add-layer $(layer);) \
 		sed -i s/^MACHINE.*/MACHINE\ =\ \"$(MACHINE)\"/g conf/local.conf ; \
+		echo "DISTRO = \"intel-axxia\"" >> conf/local.conf ; \
+		echo "RUNTARGET = \"simics\"" >> conf/local.conf ; \
+		echo "RELEASE_VERSION = \"$(AXXIA_REL)\"" >> conf/local.conf ; \
 		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\"" >> conf/local.conf ; \
 		echo "PREFERRED_VERSION_linux-yocto = \"4.12%\"" >> conf/local.conf ; \
 	fi
