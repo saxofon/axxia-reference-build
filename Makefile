@@ -93,6 +93,14 @@ $(TOP)/build/layers/meta-intel-axxia-rdk:
 	cp $(AXXIA_RDK_KLM) $@/downloads/rdk_klm_src.tar.xz
 	mkdir -p $@/downloads/unpacked
 	tar -C $@/downloads/unpacked -xf $(AXXIA_RDK_KLM)
+
+.PHONY: extract-rdk-patches
+extract-rdk-patches:
+	mkdir -p $(TOP)/build/extracted-rdk-patches
+	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -5 -o $(TOP)/build/extracted-rdk-patches
+	for p in $$(ls $(TOP)/build/extracted-rdk-patches/*.patch); do \
+		sed -i 's/^From:.*/From: Axxia Intel <axxia@intel.com>/g' $$p ;\
+	done
 endif
 
 # create wrlinux platform
