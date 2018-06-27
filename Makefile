@@ -36,7 +36,7 @@ INTEL_REL=7e284b95b45c7ec5c5b5c8cb08122d3b470c0d63
 LAYERS += $(TOP)/build/layers/meta-intel
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery13_linux4_12
+AXXIA_REL=snr_delivery13.2_linux4_12
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
