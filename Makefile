@@ -17,10 +17,10 @@ endif
 RM = $(Q)rm -f
 
 POKY_URL = git://git.yoctoproject.org/poky.git
-POKY_REL = 9915e071bcadd7c4d5363a067c529889851d37a5
+POKY_REL = 90414ecd5cf72995074f3dc6b05cfbee0a1dab67
 
 OE_URL = https://github.com/openembedded/meta-openembedded.git
-OE_REL = dacfa2b1920e285531bec55cd2f08743390aaf57
+OE_REL = 352531015014d1957d6444d114f4451e241c4d23
 LAYERS += $(TOP)/build/layers/meta-openembedded
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-oe
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-python
@@ -32,19 +32,27 @@ VIRT_REL = bd77388f31929f38e7d4cc9c711f0f83f563007e
 LAYERS += $(TOP)/build/layers/meta-virtualization
 
 INTEL_URL=git://git.yoctoproject.org/meta-intel
-INTEL_REL=7e284b95b45c7ec5c5b5c8cb08122d3b470c0d63
+INTEL_REL=f66ce51d059d291a441d896854be8db70de5a554
 LAYERS += $(TOP)/build/layers/meta-intel
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery13.2_linux4_12
+AXXIA_REL=snr_delivery14.3
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
+
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
-AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/13/rdk_klm_src_*xz
+AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/14.3/rdk_klm_src_*xz
+AXXIA_RDK_USER=/wr/installs/ASE/snowridge/14.3/rdk_user_src_*xz
+
+LAYERS += $(TOP)/build/layers/meta-dpdk
+DPDK_URL=https://git.yoctoproject.org/cgit/cgit.cgi/meta-dpdk
+DPDK_REL=9d2d7a606278131479cc5b6c8cad65ddea3ff9f6
+AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/14.3/dpdk_diff*.patch
+
 endif
 
 MACHINE=axxiax86-64
@@ -86,21 +94,24 @@ $(TOP)/build/layers/meta-intel-axxia:
 $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr: $(TOP)/build/layers/meta-intel-axxia
 
 ifeq ($(ENABLE_AXXIA_RDK),yes)
+$(TOP)/build/layers/meta-dpdk:
+	git -C $(TOP)/build/layers clone $(DPDK_URL) $@
+	git -C $@ checkout $(DPDK_REL)
+
 $(TOP)/build/layers/meta-intel-axxia-rdk:
 	git -C $(TOP)/build/layers clone $(AXXIA_RDK_URL) $@
 	git -C $@ checkout $(AXXIA_REL)
 	mkdir -p $@/downloads
 	cp $(AXXIA_RDK_KLM) $@/downloads/rdk_klm_src.tar.xz
+#	cp $(AXXIA_RDK_USER) $@/downloads/rdk_user_src.tar.xz
+#	cp $(AXXIA_RDK_DPDKPATCH) $@/downloads/dpdk_diff.patch
 	mkdir -p $@/downloads/unpacked
 	tar -C $@/downloads/unpacked -xf $(AXXIA_RDK_KLM)
 
 .PHONY: extract-rdk-patches
 extract-rdk-patches:
 	mkdir -p $(TOP)/build/extracted-rdk-patches
-	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -5 -o $(TOP)/build/extracted-rdk-patches
-	for p in $$(ls $(TOP)/build/extracted-rdk-patches/*.patch); do \
-		sed -i 's/^From:.*/From: Axxia Intel <axxia@intel.com>/g' $$p ;\
-	done
+	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-rdk-patches before_rdk_commits..after_rdk_commits
 endif
 
 # create wrlinux platform
@@ -121,7 +132,8 @@ build/build: build $(LAYERS)
 		source poky/oe-init-build-env ; \
 		$(foreach layer, $(LAYERS), bitbake-layers add-layer $(layer);) \
 		sed -i s/^MACHINE.*/MACHINE\ =\ \"$(MACHINE)\"/g conf/local.conf ; \
-		echo "DISTRO = \"intel-axxia\"" >> conf/local.conf ; \
+		echo "DISTRO = \"intel-axxia-indist\"" >> conf/local.conf ; \
+#		echo "DISTRO_FEATURES_APPEND = \" userspace\"" >> conf/local.conf ; \
 		echo "RUNTARGET = \"simics\"" >> conf/local.conf ; \
 		echo "RELEASE_VERSION = \"$(AXXIA_REL)\"" >> conf/local.conf ; \
 		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\"" >> conf/local.conf ; \
