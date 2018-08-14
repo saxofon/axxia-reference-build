@@ -51,7 +51,7 @@ AXXIA_RDK_USER=/wr/installs/ASE/snowridge/14.3/rdk_user_src_*xz
 LAYERS += $(TOP)/build/layers/meta-dpdk
 DPDK_URL=https://git.yoctoproject.org/cgit/cgit.cgi/meta-dpdk
 DPDK_REL=9d2d7a606278131479cc5b6c8cad65ddea3ff9f6
-AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/14.3/dpdk_diff*.patch
+AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/14/dpdk_diff*.patch
 
 endif
 
@@ -104,7 +104,7 @@ $(TOP)/build/layers/meta-intel-axxia-rdk:
 	mkdir -p $@/downloads
 	cp $(AXXIA_RDK_KLM) $@/downloads/rdk_klm_src.tar.xz
 	cp $(AXXIA_RDK_USER) $@/downloads/rdk_user_src.tar.xz
-#	cp $(AXXIA_RDK_DPDKPATCH) $@/downloads/dpdk_diff.patch
+	cp $(AXXIA_RDK_DPDKPATCH) $@/downloads/dpdk_diff.patch
 	mkdir -p $@/downloads/unpacked
 	tar -C $@/downloads/unpacked -xf $(AXXIA_RDK_KLM)
 
@@ -134,6 +134,7 @@ build/build: build $(LAYERS)
 		sed -i s/^MACHINE.*/MACHINE\ =\ \"$(MACHINE)\"/g conf/local.conf ; \
 		echo "DISTRO = \"intel-axxia-indist\"" >> conf/local.conf ; \
 		echo "DISTRO_FEATURES_append = \" userspace\"" >> conf/local.conf ; \
+		echo "DISTRO_FEATURES_append = \" dpdk\"" >> conf/local.conf ; \
 		echo "RUNTARGET = \"simics\"" >> conf/local.conf ; \
 		echo "RELEASE_VERSION = \"$(AXXIA_REL)\"" >> conf/local.conf ; \
 		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\"" >> conf/local.conf ; \
