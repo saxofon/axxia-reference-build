@@ -17,7 +17,7 @@ endif
 RM = $(Q)rm -f
 
 POKY_URL = git://git.yoctoproject.org/poky.git
-POKY_REL = 90414ecd5cf72995074f3dc6b05cfbee0a1dab67
+POKY_REL = 9ed1178c87afce997d5a21cadae7461fb6bb48da
 
 OE_URL = https://github.com/openembedded/meta-openembedded.git
 OE_REL = 352531015014d1957d6444d114f4451e241c4d23
@@ -31,33 +31,36 @@ VIRT_URL = git://git.yoctoproject.org/meta-virtualization
 VIRT_REL = bd77388f31929f38e7d4cc9c711f0f83f563007e
 LAYERS += $(TOP)/build/layers/meta-virtualization
 
-INTEL_URL=git://git.yoctoproject.org/meta-intel
-INTEL_REL=f66ce51d059d291a441d896854be8db70de5a554
+INTEL_URL = git://git.yoctoproject.org/meta-intel
+INTEL_REL = b4d10c37695806143fbaca94eea467ddd27ac7a8
 LAYERS += $(TOP)/build/layers/meta-intel
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery14.3
+AXXIA_REL=snr_delivery15
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-
-LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
-AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
-AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/14.3/rdk_klm_src_*xz
-AXXIA_RDK_USER=/wr/installs/ASE/snowridge/14.3/rdk_user_src_*xz
+AXXIA_RDK_VER=15
 
 LAYERS += $(TOP)/build/layers/meta-dpdk
 DPDK_URL=https://git.yoctoproject.org/cgit/cgit.cgi/meta-dpdk
 DPDK_REL=9d2d7a606278131479cc5b6c8cad65ddea3ff9f6
-AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/14/dpdk_diff*.patch
+AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/dpdk_diff*.patch
 
+LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
+AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk_private.git
+AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/rdk_klm_src_*xz
+AXXIA_RDK_USER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/rdk_user_src_*xz
+
+LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
+AXXIA_ADK_LAYER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/adk_meta-intel-axxia-adknetd*gz
 endif
 
 MACHINE=axxiax86-64
 
-IMAGE=axxia-image-sim
+IMAGE=axxia-image-large
 
 define bitbake
 	cd build ; \
@@ -107,6 +110,11 @@ $(TOP)/build/layers/meta-intel-axxia-rdk:
 	cp $(AXXIA_RDK_DPDKPATCH) $@/downloads/dpdk_diff.patch
 	mkdir -p $@/downloads/unpacked
 	tar -C $@/downloads/unpacked -xf $(AXXIA_RDK_KLM)
+	git -C $@ am $(TOP)/delivery-fixes/0001-add-dpdk-rdk-18.05-recipe.patch
+
+$(TOP)/build/layers/meta-intel-axxia-adknetd:
+	tar -C $(TOP)/build/layers -xf $(AXXIA_ADK_LAYER)
+	ln -s $@/downloads/adk*gz $@/downloads/adk_source.tiger_netd.tar.gz
 
 .PHONY: extract-rdk-patches
 extract-rdk-patches:
@@ -140,6 +148,9 @@ build/build: build $(LAYERS)
 		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\"" >> conf/local.conf ; \
 		echo "PREFERRED_VERSION_linux-yocto = \"4.12%\"" >> conf/local.conf ; \
 	fi
+
+layer-list:
+	echo $(LAYERS)
 
 bbs: build/build
 	$(Q)cd build ; \

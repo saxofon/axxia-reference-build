@@ -1,0 +1,244 @@
+From f3acc3e0acb905a4a314e0b392bf586e6d5999f4 Mon Sep 17 00:00:00 2001
+From: Beniamin Sandu <Beniamin.Sandu@windriver.com>
+Date: Thu, 6 Sep 2018 22:20:06 +0300
+Subject: [PATCH] add dpdk-rdk 18.05 recipe
+
+Signed-off-by: Beniamin Sandu <Beniamin.Sandu@windriver.com>
+---
+ recipes-extended/dpdk/dpdk-rdk_17.08.bb            | 62 ---------------------
+ recipes-extended/dpdk/dpdk-rdk_18.05.bb            | 65 ++++++++++++++++++++++
+ ...-examples-Fix-maybe-uninitialized-warning.patch | 42 ++++++++++++++
+ ...le-ip_fragmentation-in-common_base-config.patch | 31 +++++++++++
+ 4 files changed, 138 insertions(+), 62 deletions(-)
+ delete mode 100644 recipes-extended/dpdk/dpdk-rdk_17.08.bb
+ create mode 100644 recipes-extended/dpdk/dpdk-rdk_18.05.bb
+ create mode 100644 recipes-extended/dpdk/files/0001-examples-Fix-maybe-uninitialized-warning.patch
+ create mode 100644 recipes-extended/dpdk/files/dpdk-16.04-dpdk-enable-ip_fragmentation-in-common_base-config.patch
+
+diff --git a/recipes-extended/dpdk/dpdk-rdk_17.08.bb b/recipes-extended/dpdk/dpdk-rdk_17.08.bb
+deleted file mode 100644
+index 56e201f..0000000
+--- a/recipes-extended/dpdk/dpdk-rdk_17.08.bb
++++ /dev/null
+@@ -1,62 +0,0 @@
+-FILESEXTRAPATHS_prepend := "${RDK_ARCHIVE_PATH}:"
+-
+-require recipes-extended/dpdk/dpdk.inc
+-
+-STABLE = "-stable"
+-BRANCH = "17.08"
+-SRCREV = "02657b4adcb8af773e26ec061b01cd7abdd3f0b6"
+-
+-SRC_URI = "git://dpdk.org/dpdk${STABLE};branch=${BRANCH} \
+-           file://dpdk-16.04-add-RTE_KERNELDIR_OUT-to-split-kernel-bu.patch \
+-           file://${RDK_DPDK_PATCH} \
+-           file://examples-eventdev-pipeline-Fix-implicit-declaration.patch "
+-
+-LICENSE = "LGPLv2 & GPLv2 & BSD"
+-LIC_FILES_CHKSUM = "file://LICENSE.GPL;md5=751419260aa954499f7abaabaa882bbe \
+-                    file://LICENSE.LGPL;md5=4fbd65380cdd255951079008b364516c \
+-                    file://LICENSE.BSD;md5=701db1808cef1c74d6d226be6fa5be17"
+-
+-DEPENDS_append_axxiax86-64 = " rdk-user"
+-
+-PACKAGECONFIG_append_axxiax86-64 = " numa"
+-
+-export SYSROOT = "${WORKDIR}/recipe-sysroot"
+-export LIB_CPKAE_DIR = "${SYSROOT}/usr/lib"
+-export IES_API_DIR = "${SYSROOT}/usr/lib"
+-export LIB_QAT18_DIR = "${SYSROOT}/usr/lib"
+-
+-# Disable devel build to avoid rpath in binaries.
+-# Default is y if sources are in a git tree.
+-export RTE_DEVEL_BUILD = "n"
+-
+-# make sure compile target support SSE4.2 for auto-vectorizing
+-TARGET_CFLAGS_append_axxiax86-64 = "-msse4.2 "
+-
+-do_configure_prepend () {
+-	# Set RDK config options in RTE_TARGET defconfig
+-	RTE_DEFCONFIG="${S}/config/defconfig_${RTE_TARGET}"
+-	echo "CONFIG_RTE_BUILD_SHARED_LIB=y"               >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_MAX_MEMZONE=10240"                >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_EAL_NUMA_AWARE_HUGEPAGES=y"       >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_MAX_QUEUES_PER_PORT=16384"        >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_LIBRTE_PMD_PCAP=y"                >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_LIBRTE_PMD_IHQM_EVENTDEV_DEBUG=y" >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_LIBRTE_PMD_QAT=y"                 >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_LIBRTE_PMD_QAT_DEBUG_DRIVER=y"    >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_LIBRTE_POWER=y"                   >> ${RTE_DEFCONFIG}
+-	echo "CONFIG_RTE_LIBRTE_VHOST_NUMA=y"              >> ${RTE_DEFCONFIG}
+-}
+-
+-do_install_append () {
+-	install -m 755 ${S}/${RTE_TARGET}/app/dpdk-pmdinfogen ${D}${bindir}
+-	install -m 755 ${S}/examples/ethtool/lib/${RTE_TARGET}/lib/librte_ethtool.so.1 \
+-		       ${D}${libdir}
+-	ln -sf librte_ethtool.so.1 ${D}${libdir}/librte_ethtool.so
+-
+-	rm -rf ${D}/usr/share/mk
+-	rm -rf ${D}/usr/share/${RTE_TARGET}/app
+-
+-	chown -R root:root ${D}
+-}
+-
+-RDEPENDS_${PN}-examples += "${PN} ${PN}-dev"
+diff --git a/recipes-extended/dpdk/dpdk-rdk_18.05.bb b/recipes-extended/dpdk/dpdk-rdk_18.05.bb
+new file mode 100644
+index 0000000..314fbaa
+--- /dev/null
++++ b/recipes-extended/dpdk/dpdk-rdk_18.05.bb
+@@ -0,0 +1,65 @@
++FILESEXTRAPATHS_prepend := "${RDK_ARCHIVE_PATH}:"
++
++require recipes-extended/dpdk/dpdk.inc
++
++STABLE = "-stable"
++BRANCH = "18.05"
++#SRCREV = "d0724a1c4876019d83ffc35b52e0e97bd691f477"
++SRCREV = "a5dce55556286cc56655320d975c67b0dbe08693"
++
++SRC_URI = "git://dpdk.org/dpdk${STABLE};branch=${BRANCH} \
++	   file://dpdk-16.04-add-RTE_KERNELDIR_OUT-to-split-kernel-bu.patch \
++	   file://dpdk-16.04-dpdk-enable-ip_fragmentation-in-common_base-config.patch \
++	   file://0001-examples-Fix-maybe-uninitialized-warning.patch \
++           file://${RDK_DPDK_PATCH} \
++"
++
++LICENSE = "LGPLv2 & GPLv2 & BSD"
++LIC_FILES_CHKSUM = "file://license/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263 \                                                                                                                               
++                    file://license/lgpl-2.1.txt;md5=4b54a1fd55a448865a0b32d41598759d \                                                                                                                              
++                    file://license/bsd-3-clause.txt;md5=0f00d99239d922ffd13cabef83b33444"
++
++DEPENDS_append_axxiax86-64 = " rdk-user"
++
++PACKAGECONFIG_append_axxiax86-64 = " numa"
++
++export SYSROOT = "${WORKDIR}/recipe-sysroot"
++export LIB_CPKAE_DIR = "${SYSROOT}/usr/lib"
++export IES_API_DIR = "${SYSROOT}/usr/lib"
++export LIB_QAT18_DIR = "${SYSROOT}/usr/lib"
++
++# Disable devel build to avoid rpath in binaries.
++# Default is y if sources are in a git tree.
++export RTE_DEVEL_BUILD = "n"
++
++# make sure compile target support SSE4.2 for auto-vectorizing
++TARGET_CFLAGS_append_axxiax86-64 = "-msse4.2 "
++
++do_configure_prepend () {
++	# Set RDK config options in RTE_TARGET defconfig
++	RTE_DEFCONFIG="${S}/config/defconfig_${RTE_TARGET}"
++	echo "CONFIG_RTE_BUILD_SHARED_LIB=y"               >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_MAX_MEMZONE=10240"                >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_EAL_NUMA_AWARE_HUGEPAGES=y"       >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_MAX_QUEUES_PER_PORT=16384"        >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_LIBRTE_PMD_PCAP=y"                >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_LIBRTE_PMD_IHQM_EVENTDEV_DEBUG=y" >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_LIBRTE_PMD_QAT=y"                 >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_LIBRTE_PMD_QAT_DEBUG_DRIVER=y"    >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_LIBRTE_POWER=y"                   >> ${RTE_DEFCONFIG}
++	echo "CONFIG_RTE_LIBRTE_VHOST_NUMA=y"              >> ${RTE_DEFCONFIG}
++}
++
++do_install_append () {
++	install -m 755 ${S}/${RTE_TARGET}/app/dpdk-pmdinfogen ${D}${bindir}
++	install -m 755 ${S}/examples/ethtool/lib/${RTE_TARGET}/lib/librte_ethtool.so.1 \
++		       ${D}${libdir}
++	ln -sf librte_ethtool.so.1 ${D}${libdir}/librte_ethtool.so
++
++	rm -rf ${D}/usr/share/mk
++	rm -rf ${D}/usr/share/${RTE_TARGET}/app
++
++	chown -R root:root ${D}
++}
++
++RDEPENDS_${PN}-examples += "${PN} ${PN}-dev"
+diff --git a/recipes-extended/dpdk/files/0001-examples-Fix-maybe-uninitialized-warning.patch b/recipes-extended/dpdk/files/0001-examples-Fix-maybe-uninitialized-warning.patch
+new file mode 100644
+index 0000000..2facd39
+--- /dev/null
++++ b/recipes-extended/dpdk/files/0001-examples-Fix-maybe-uninitialized-warning.patch
+@@ -0,0 +1,42 @@
++From 41ac64efa5050430b73e0f8813dffc7327083273 Mon Sep 17 00:00:00 2001
++From: Khem Raj <raj.khem@gmail.com>
++Date: Tue, 1 Aug 2017 20:18:46 -0700
++Subject: [PATCH] examples: Fix maybe-uninitialized warning
++
++Initialize arrays to 0, makes compiler happy about
++
++error: 'vals[0]' may be used uninitialized in this function [-Werror=maybe-uninitialized]
++
++Signed-off-by: Khem Raj <raj.khem@gmail.com>
++
++---
++ examples/qos_sched/args.c   | 2 +-
++ examples/vhost/virtio_net.c | 2 +-
++ 2 files changed, 2 insertions(+), 2 deletions(-)
++
++diff --git a/examples/qos_sched/args.c b/examples/qos_sched/args.c
++index 83eee95cc28e..3d2c0fbd6d0a 100644
++--- a/examples/qos_sched/args.c
+++++ b/examples/qos_sched/args.c
++@@ -212,7 +212,7 @@ static int
++ app_parse_flow_conf(const char *conf_str)
++ {
++ 	int ret;
++-	uint32_t vals[5];
+++	uint32_t vals[5] = {0};
++ 	struct flow_conf *pconf;
++ 	uint64_t mask;
++ 
++diff --git a/examples/vhost/virtio_net.c b/examples/vhost/virtio_net.c
++index f6e00674d9af..a4a90704d7b4 100644
++--- a/examples/vhost/virtio_net.c
+++++ b/examples/vhost/virtio_net.c
++@@ -293,7 +293,7 @@ vs_dequeue_pkts(struct vhost_dev *dev, uint16_t queue_id,
++ {
++ 	struct vhost_queue *queue;
++ 	struct rte_vhost_vring *vr;
++-	uint32_t desc_indexes[MAX_PKT_BURST];
+++	uint32_t desc_indexes[MAX_PKT_BURST] = {0};
++ 	uint32_t used_idx;
++ 	uint32_t i = 0;
++ 	uint16_t free_entries;
+diff --git a/recipes-extended/dpdk/files/dpdk-16.04-dpdk-enable-ip_fragmentation-in-common_base-config.patch b/recipes-extended/dpdk/files/dpdk-16.04-dpdk-enable-ip_fragmentation-in-common_base-config.patch
+new file mode 100644
+index 0000000..7a8b035
+--- /dev/null
++++ b/recipes-extended/dpdk/files/dpdk-16.04-dpdk-enable-ip_fragmentation-in-common_base-config.patch
+@@ -0,0 +1,31 @@
++From 916378ef5ae45e63d12cc5235b2b59f90514ba25 Mon Sep 17 00:00:00 2001
++From: Rahul Kumar Gupta <rahul.kumarxx.gupta@intel.com>
++Date: Fri, 1 Apr 2016 17:31:55 +0800
++Subject: [PATCH] dpdk: enable ip_fragmentation in common_base config
++
++Upstream-Status: Inappropriate [Configuration]
++
++This configuration need to set for ip_fragmentation application.
++
++Signed-off-by: Rahul Kumar Gupta <rahul.kumarxx.gupta@intel.com>
++
++---
++ config/common_base | 5 +++++
++ 1 file changed, 5 insertions(+)
++
++diff --git a/config/common_base b/config/common_base
++index ad03cf43392f..ba5794d6c402 100644
++--- a/config/common_base
+++++ b/config/common_base
++@@ -691,6 +691,11 @@ CONFIG_RTE_LIBRTE_POWER=n
++ CONFIG_RTE_LIBRTE_POWER_DEBUG=n
++ CONFIG_RTE_MAX_LCORE_FREQS=64
++ 
+++#
+++# Compile ip_fragmentation
+++#
+++CONFIG_RTE_IP_FRAG=y
+++
++ #
++ # Compile librte_net
++ #
+-- 
+2.7.4
+
