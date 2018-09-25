@@ -36,26 +36,32 @@ INTEL_REL = b4d10c37695806143fbaca94eea467ddd27ac7a8
 LAYERS += $(TOP)/build/layers/meta-intel
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery15
+AXXIA_REL=snr_delivery15.1
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-AXXIA_RDK_VER=15
-
-LAYERS += $(TOP)/build/layers/meta-dpdk
-DPDK_URL=https://git.yoctoproject.org/cgit/cgit.cgi/meta-dpdk
-DPDK_REL=9d2d7a606278131479cc5b6c8cad65ddea3ff9f6
-AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/dpdk_diff*.patch
+AXXIA_RDK_VER=15.1
 
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk_private.git
 AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/rdk_klm_src_*xz
 AXXIA_RDK_USER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/rdk_user_src_*xz
 
+endif
+
+ENABLE_AXXIA_ADK=no
+ifeq ($(ENABLE_AXXIA_ADK),yes)
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
 AXXIA_ADK_LAYER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/adk_meta-intel-axxia-adknetd*gz
+endif
+
+ENABLE_AXXIA_DPDK=no
+ifeq ($(ENABLE_AXXIA_DPDK),yes)
+DPDK_URL=https://git.yoctoproject.org/cgit/cgit.cgi/meta-dpdk
+DPDK_REL=9d2d7a606278131479cc5b6c8cad65ddea3ff9f6
+AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/dpdk_diff*.patch
 endif
 
 MACHINE=axxiax86-64
@@ -97,20 +103,14 @@ $(TOP)/build/layers/meta-intel-axxia:
 $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr: $(TOP)/build/layers/meta-intel-axxia
 
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-$(TOP)/build/layers/meta-dpdk:
-	git -C $(TOP)/build/layers clone $(DPDK_URL) $@
-	git -C $@ checkout $(DPDK_REL)
-
 $(TOP)/build/layers/meta-intel-axxia-rdk:
 	git -C $(TOP)/build/layers clone $(AXXIA_RDK_URL) $@
 	git -C $@ checkout $(AXXIA_REL)
 	mkdir -p $@/downloads
 	cp $(AXXIA_RDK_KLM) $@/downloads/rdk_klm_src.tar.xz
 	cp $(AXXIA_RDK_USER) $@/downloads/rdk_user_src.tar.xz
-	cp $(AXXIA_RDK_DPDKPATCH) $@/downloads/dpdk_diff.patch
 	mkdir -p $@/downloads/unpacked
 	tar -C $@/downloads/unpacked -xf $(AXXIA_RDK_KLM)
-	git -C $@ am $(TOP)/delivery-fixes/0001-add-dpdk-rdk-18.05-recipe.patch
 
 $(TOP)/build/layers/meta-intel-axxia-adknetd:
 	tar -C $(TOP)/build/layers -xf $(AXXIA_ADK_LAYER)
@@ -122,6 +122,8 @@ extract-rdk-patches:
 	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-rdk-patches before_rdk_commits..after_rdk_commits
 endif
 
+ifeq ($(ENABLE_AXXIA_DPDK),yes)
+endif
 # create wrlinux platform
 .PHONY: build
 build:
@@ -142,7 +144,6 @@ build/build: build $(LAYERS)
 		sed -i s/^MACHINE.*/MACHINE\ =\ \"$(MACHINE)\"/g conf/local.conf ; \
 		echo "DISTRO = \"intel-axxia-indist\"" >> conf/local.conf ; \
 		echo "DISTRO_FEATURES_append = \" userspace\"" >> conf/local.conf ; \
-		echo "DISTRO_FEATURES_append = \" dpdk\"" >> conf/local.conf ; \
 		echo "RUNTARGET = \"simics\"" >> conf/local.conf ; \
 		echo "RELEASE_VERSION = \"$(AXXIA_REL)\"" >> conf/local.conf ; \
 		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\"" >> conf/local.conf ; \
