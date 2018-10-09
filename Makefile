@@ -36,13 +36,13 @@ INTEL_REL = b4d10c37695806143fbaca94eea467ddd27ac7a8
 LAYERS += $(TOP)/build/layers/meta-intel
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery15.1
+AXXIA_REL=snr_delivery15.2
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-AXXIA_RDK_VER=15.1
+AXXIA_RDK_VER=15.2
 
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk_private.git
@@ -51,7 +51,7 @@ AXXIA_RDK_USER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/rdk_user_src_*xz
 
 endif
 
-ENABLE_AXXIA_ADK=no
+ENABLE_AXXIA_ADK=yes
 ifeq ($(ENABLE_AXXIA_ADK),yes)
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
 AXXIA_ADK_LAYER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/adk_meta-intel-axxia-adknetd*gz
@@ -114,12 +114,16 @@ $(TOP)/build/layers/meta-intel-axxia-rdk:
 
 $(TOP)/build/layers/meta-intel-axxia-adknetd:
 	tar -C $(TOP)/build/layers -xf $(AXXIA_ADK_LAYER)
-	ln -s $@/downloads/adk*gz $@/downloads/adk_source.tiger_netd.tar.gz
+endif
 
-.PHONY: extract-rdk-patches
-extract-rdk-patches:
-	mkdir -p $(TOP)/build/extracted-rdk-patches
-	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-rdk-patches before_rdk_commits..after_rdk_commits
+.PHONY: extract-kernel-patches
+extract-kernel-patches:
+	mkdir -p $(TOP)/build/extracted-kernel-patches
+ifeq ($(ENABLE_AXXIA_RDK),yes)
+	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-kernel-patches before_rdk_commits..after_rdk_commits
+endif
+ifeq ($(ENABLE_AXXIA_ADK),yes)
+	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-kernel-patches before_adknetd_commits..after_adknetd_commits
 endif
 
 ifeq ($(ENABLE_AXXIA_DPDK),yes)
