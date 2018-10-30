@@ -17,51 +17,56 @@ endif
 RM = $(Q)rm -f
 
 POKY_URL = git://git.yoctoproject.org/poky.git
-POKY_REL = 9ed1178c87afce997d5a21cadae7461fb6bb48da
+POKY_REL = cd3c8323d855876d55e03eb51b0a5b42830e9473
 
 OE_URL = https://github.com/openembedded/meta-openembedded.git
-OE_REL = 352531015014d1957d6444d114f4451e241c4d23
+OE_REL = eae996301d9c097bcbeb8046f08041dc82bb62f8
 LAYERS += $(TOP)/build/layers/meta-openembedded
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-oe
+LAYERS += $(TOP)/build/layers/meta-openembedded/meta-perl
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-python
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-networking
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-filesystems
 
 VIRT_URL = git://git.yoctoproject.org/meta-virtualization
-VIRT_REL = bd77388f31929f38e7d4cc9c711f0f83f563007e
+VIRT_REL = b704c689b67639214b9568a3d62e82df27e9434f
 LAYERS += $(TOP)/build/layers/meta-virtualization
 
 INTEL_URL = git://git.yoctoproject.org/meta-intel
-INTEL_REL = b4d10c37695806143fbaca94eea467ddd27ac7a8
+INTEL_REL = 4ee8ff5ebe0657bd376d7a79703a21ec070ee779
 LAYERS += $(TOP)/build/layers/meta-intel
 
-AXXIA_URL=git@github.com:axxia/meta-intel-axxia_private.git
-AXXIA_REL=snr_delivery15.2
+SECURITY_URL = git://git.yoctoproject.org/meta-security
+SECURITY_REL = 74860b2b61afd033fba130044ae66567ead57aaf
+LAYERS += $(TOP)/build/layers/meta-security
+
+AXXIA_URL=git@github.com:axxia/meta-intel-axxia.git
+AXXIA_REL=snr_po_rdk0
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-AXXIA_RDK_VER=15.2
+AXXIA_RDK_VER=snr_po_rdk0
 
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk_private.git
-AXXIA_RDK_KLM=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/rdk_klm_src_*xz
-AXXIA_RDK_USER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/rdk_user_src_*xz
+AXXIA_RDK_KLM=/wr/installs/snr/$(AXXIA_RDK_VER)/rdk_klm_src_*xz
+AXXIA_RDK_USER=/wr/installs/snr/$(AXXIA_RDK_VER)/rdk_user_src_*xz
 
 endif
 
-ENABLE_AXXIA_ADK=yes
+ENABLE_AXXIA_ADK=no
 ifeq ($(ENABLE_AXXIA_ADK),yes)
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
-AXXIA_ADK_LAYER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/adk_meta-intel-axxia-adknetd*gz
+AXXIA_ADK_LAYER=/wr/installs/snr/$(AXXIA_RDK_VER)/adk_meta-intel-axxia-adknetd*gz
 endif
 
 ENABLE_AXXIA_DPDK=no
 ifeq ($(ENABLE_AXXIA_DPDK),yes)
 DPDK_URL=https://git.yoctoproject.org/cgit/cgit.cgi/meta-dpdk
 DPDK_REL=9d2d7a606278131479cc5b6c8cad65ddea3ff9f6
-AXXIA_RDK_DPDKPATCH=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/dpdk_diff*.patch
+AXXIA_RDK_DPDKPATCH=/wr/installs/snr/$(AXXIA_RDK_VER)/dpdk_diff*.patch
 endif
 
 MACHINE=axxiax86-64
@@ -95,6 +100,10 @@ $(TOP)/build/layers/meta-virtualization:
 $(TOP)/build/layers/meta-intel:
 	git -C $(TOP)/build/layers clone $(INTEL_URL) $@
 	git -C $@ checkout $(INTEL_REL)
+
+$(TOP)/build/layers/meta-security:
+	git -C $(TOP)/build/layers clone $(SECURITY_URL) $@
+	git -C $@ checkout $(SECURITY_REL)
 
 $(TOP)/build/layers/meta-intel-axxia:
 	git -C $(TOP)/build/layers clone $(AXXIA_URL) $@
