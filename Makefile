@@ -54,7 +54,7 @@ endif
 ENABLE_AXXIA_ADK=yes
 ifeq ($(ENABLE_AXXIA_ADK),yes)
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
-AXXIA_ADK_LAYER=/wr/installs/ASE/snowridge/$(AXXIA_RDK_VER)/adk_meta-intel-axxia-adknetd*gz
+AXXIA_ADK_LAYER=/wr/installs/snr/adk-0.0.5.1406_414/adk_meta-intel-axxia-adknetd*gz
 endif
 
 ENABLE_AXXIA_DPDK=no
