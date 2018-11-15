@@ -41,13 +41,13 @@ SECURITY_REL = 74860b2b61afd033fba130044ae66567ead57aaf
 LAYERS += $(TOP)/build/layers/meta-security
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia.git
-AXXIA_REL=snr_po_rdk0
+AXXIA_REL=snr_po_rdk1
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-AXXIA_RDK_VER=snr_po_rdk0
+AXXIA_RDK_VER=snr_po_rdk1
 
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk_private.git
@@ -156,8 +156,8 @@ build/build: build $(LAYERS)
 		$(foreach layer, $(LAYERS), bitbake-layers add-layer $(layer);) \
 		sed -i s/^MACHINE.*/MACHINE\ =\ \"$(MACHINE)\"/g conf/local.conf ; \
 		echo "DISTRO = \"intel-axxia-indist\"" >> conf/local.conf ; \
-		echo "DISTRO_FEATURES_append = \" userspace\"" >> conf/local.conf ; \
-		echo "RUNTARGET = \"simics\"" >> conf/local.conf ; \
+		echo "DISTRO_FEATURES_append = \" rdk-userspace\"" >> conf/local.conf ; \
+		echo "RUNTARGET = \"snr\"" >> conf/local.conf ; \
 		echo "RELEASE_VERSION = \"$(AXXIA_REL)\"" >> conf/local.conf ; \
 		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\"" >> conf/local.conf ; \
 		echo "PREFERRED_VERSION_linux-yocto = \"4.12%\"" >> conf/local.conf ; \
