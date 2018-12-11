@@ -17,7 +17,7 @@ endif
 RM = $(Q)rm -f
 
 POKY_URL = git://git.yoctoproject.org/poky.git
-POKY_REL = cd3c8323d855876d55e03eb51b0a5b42830e9473
+POKY_REL = 8883ee32f2a77bf532832d4fad5c20912a1a3630
 
 OE_URL = https://github.com/openembedded/meta-openembedded.git
 OE_REL = eae996301d9c097bcbeb8046f08041dc82bb62f8
@@ -39,27 +39,27 @@ LAYERS += $(TOP)/build/layers/meta-intel
 SECURITY_URL = git://git.yoctoproject.org/meta-security
 SECURITY_REL = 74860b2b61afd033fba130044ae66567ead57aaf
 LAYERS += $(TOP)/build/layers/meta-security
+LAYERS += $(TOP)/build/layers/meta-security/meta-tpm
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia.git
-AXXIA_REL=snr_po_rdk1
+AXXIA_REL=snr_po_rdk2
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-AXXIA_RDK_VER=snr_po_rdk1
-
+AXXIA_RDK_VER=snr_po_rdk2
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
-AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk_private.git
+AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
 AXXIA_RDK_KLM=/wr/installs/snr/$(AXXIA_RDK_VER)/rdk_klm_src_*xz
 AXXIA_RDK_USER=/wr/installs/snr/$(AXXIA_RDK_VER)/rdk_user_src_*xz
-
 endif
 
 ENABLE_AXXIA_ADK=no
 ifeq ($(ENABLE_AXXIA_ADK),yes)
+AXXIA_ADK_VER=adk-0.0.5.1406_414
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
-AXXIA_ADK_LAYER=/wr/installs/snr/$(AXXIA_RDK_VER)/adk_meta-intel-axxia-adknetd*gz
+AXXIA_ADK_LAYER=/wr/installs/snr/$(AXXIA_ADK_VER)/adk_meta-intel-axxia-adknetd*gz
 endif
 
 ENABLE_AXXIA_DPDK=no
@@ -71,7 +71,7 @@ endif
 
 MACHINE=axxiax86-64
 
-IMAGE=axxia-image-large
+IMAGE=axxia-image-vcn
 
 define bitbake
 	cd build ; \
