@@ -132,7 +132,7 @@ ifeq ($(ENABLE_AXXIA_RDK),yes)
 	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-kernel-patches before_rdk_commits..after_rdk_commits
 endif
 ifeq ($(ENABLE_AXXIA_ADK),yes)
-	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-kernel-patches before_adknetd_commits..after_adknetd_commits
+	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch --start-number 1000 -o $(TOP)/build/extracted-kernel-patches before_adknetd_commits..after_adknetd_commits
 endif
 
 ifeq ($(ENABLE_AXXIA_DPDK),yes)
