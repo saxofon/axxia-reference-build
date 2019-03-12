@@ -42,13 +42,13 @@ LAYERS += $(TOP)/build/layers/meta-security
 LAYERS += $(TOP)/build/layers/meta-security/meta-tpm
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia.git
-AXXIA_REL=snr_combined_ase_rdk4.1
+AXXIA_REL=snr_ase_rdk5
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 LAYERS += $(TOP)/build/layers/meta-intel-axxia
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-AXXIA_RDK_VER=snr_combined_ase_rdk4.1
+AXXIA_RDK_VER=snr_ase_rdk5
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
 AXXIA_RDK_KLM=/wr/installs/snr/$(AXXIA_RDK_VER)/rdk_klm_src_*xz
@@ -57,7 +57,7 @@ endif
 
 ENABLE_AXXIA_ADK=yes
 ifeq ($(ENABLE_AXXIA_ADK),yes)
-AXXIA_ADK_VER=adk-0.0.6.057_407
+AXXIA_ADK_VER=adk-0.0.6.062_611
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
 AXXIA_ADK_LAYER=/wr/installs/snr/$(AXXIA_ADK_VER)/adk_meta-intel-axxia-adknetd*gz
 endif
