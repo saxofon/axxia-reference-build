@@ -17,7 +17,7 @@ endif
 RM = $(Q)rm -f
 
 POKY_URL = git://git.yoctoproject.org/poky.git
-POKY_REL = faeb366bc3eb322f5f203cfe08dc4cf529a822e9
+POKY_REL = 50f33d3bfebcbfb1538d932fb487cfd789872026
 
 OE_URL = https://github.com/openembedded/meta-openembedded.git
 OE_REL = 4cd3a39f22a2712bfa8fc657d09fe2c7765a4005
@@ -29,7 +29,7 @@ LAYERS += $(TOP)/build/layers/meta-openembedded/meta-networking
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-filesystems
 
 VIRT_URL = git://git.yoctoproject.org/meta-virtualization
-VIRT_REL = 9e8c0c96b443828a255e7d6ca6291598347672ac
+VIRT_REL = 9b568b6ae1bf1bebcb9552703ee40f9b880e07ed
 LAYERS += $(TOP)/build/layers/meta-virtualization
 
 INTEL_URL = git://git.yoctoproject.org/meta-intel
@@ -42,31 +42,30 @@ LAYERS += $(TOP)/build/layers/meta-security
 LAYERS += $(TOP)/build/layers/meta-security/meta-tpm
 
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia.git
-AXXIA_REL=snr_ase_rdk_1904
+AXXIA_REL=snr_ase_rdk_1905
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-axxia
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 
 ENABLE_AXXIA_RDK=yes
 ifeq ($(ENABLE_AXXIA_RDK),yes)
-AXXIA_RDK_VER=snr_ase_rdk_1904
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
-AXXIA_RDK_KLM=/wr/installs/snr/$(AXXIA_RDK_VER)/rdk_klm_src_*xz
-AXXIA_RDK_USER=/wr/installs/snr/$(AXXIA_RDK_VER)/rdk_user_src_*xz
+AXXIA_RDK_KLM=/wr/installs/snr/$(AXXIA_REL)/rdk_klm_src_*xz
+AXXIA_RDK_USER=/wr/installs/snr/$(AXXIA_REL)/rdk_user_src_*xz
 endif
 
 ENABLE_AXXIA_ADK=yes
 ifeq ($(ENABLE_AXXIA_ADK),yes)
-AXXIA_ADK_VER=adk-0.0.6.068_407
+AXXIA_ADK_REL=adk-0.0.6.075_610
 LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
-AXXIA_ADK_LAYER=/wr/installs/snr/$(AXXIA_ADK_VER)/adk_meta-intel-axxia-adknetd*gz
+AXXIA_ADK_LAYER=/wr/installs/snr/$(AXXIA_ADK_REL)/adk_meta-intel-axxia-adknetd*gz
 endif
 
 ENABLE_AXXIA_DPDK=no
 ifeq ($(ENABLE_AXXIA_DPDK),yes)
 DPDK_URL=https://git.yoctoproject.org/cgit/cgit.cgi/meta-dpdk
 DPDK_REL=9d2d7a606278131479cc5b6c8cad65ddea3ff9f6
-AXXIA_RDK_DPDKPATCH=/wr/installs/snr/$(AXXIA_RDK_VER)/dpdk_diff*.patch
+AXXIA_RDK_DPDKPATCH=/wr/installs/snr/$(AXXIA_REL)/dpdk_diff*.patch
 endif
 
 MACHINE=axxiax86-64
@@ -162,8 +161,8 @@ build/build: build $(LAYERS)
 		echo "DISTRO_FEATURES_append = \" rdk-userspace\"" >> conf/local.conf ; \
 		echo "RUNTARGET = \"snr\"" >> conf/local.conf ; \
 		echo "RELEASE_VERSION = \"$(AXXIA_REL)\"" >> conf/local.conf ; \
-		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-yocto\"" >> conf/local.conf ; \
-		echo "PREFERRED_VERSION_linux-yocto = \"4.12%\"" >> conf/local.conf ; \
+		echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-intel\"" >> conf/local.conf ; \
+		echo "PREFERRED_VERSION_linux-intel = \"4.19%\"" >> conf/local.conf ; \
 	fi
 
 layer-list:
