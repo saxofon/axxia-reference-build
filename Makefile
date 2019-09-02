@@ -16,11 +16,15 @@ endif
 
 RM = $(Q)rm -f
 
-POKY_URL = git://git.yoctoproject.org/poky.git
-POKY_REL = 50f33d3bfebcbfb1538d932fb487cfd789872026
+AXXIA_REL:=snr_ase_rdk_1908
 
-OE_URL = https://github.com/openembedded/meta-openembedded.git
-OE_REL = 4cd3a39f22a2712bfa8fc657d09fe2c7765a4005
+POKY_URL:= git://git.yoctoproject.org/poky.git
+POKY_REL:= cdd4a52578f4f1b79b3fc2c92aa4434b99efd91c
+DEPENDENCIES_POKY_REL:=$(shell curl -s https://raw.githubusercontent.com/axxia/meta-intel-axxia/$(AXXIA_REL)/DEPENDENCIES | grep -A4 -w "^poky" | tail -1 | cut -d" " -f2)
+
+OE_URL:= https://github.com/openembedded/meta-openembedded.git
+OE_REL:= 9b3b907f30b0d5b92d58c7e68289184fda733d3e
+DEPENDENCIES_OE_REL:=$(shell curl -s https://raw.githubusercontent.com/axxia/meta-intel-axxia/$(AXXIA_REL)/DEPENDENCIES | grep -A4 -w "^meta-openembedded" | tail -1 | cut -d" " -f2)
 #LAYERS += $(TOP)/build/layers/meta-openembedded
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-oe
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-perl
@@ -28,21 +32,28 @@ LAYERS += $(TOP)/build/layers/meta-openembedded/meta-python
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-networking
 LAYERS += $(TOP)/build/layers/meta-openembedded/meta-filesystems
 
-VIRT_URL = git://git.yoctoproject.org/meta-virtualization
-VIRT_REL = 9b568b6ae1bf1bebcb9552703ee40f9b880e07ed
+VIRT_URL:= git://git.yoctoproject.org/meta-virtualization
+VIRT_REL:= bbc38dc9d6d02e73c08df289bb22a292c2264e9b
+DEPENDENCIES_VIRT_REL:=$(shell curl -s https://raw.githubusercontent.com/axxia/meta-intel-axxia/$(AXXIA_REL)/DEPENDENCIES | grep -A4 -w "^meta-virtualization" | tail -1 | cut -d" " -f2)
 LAYERS += $(TOP)/build/layers/meta-virtualization
 
-INTEL_URL = git://git.yoctoproject.org/meta-intel
-INTEL_REL = 27dadcfc7bc0de70328b02fecb841608389d22fc
+INTEL_URL:= git://git.yoctoproject.org/meta-intel
+INTEL_REL:= 3c45215fe075ddaa892bc87f969f50684a7062b4
+DEPENDENCIES_INTEL_REL:=$(shell curl -s https://raw.githubusercontent.com/axxia/meta-intel-axxia/$(AXXIA_REL)/DEPENDENCIES | grep -A4 -w "^meta-intel" | tail -1 | cut -d" " -f2)
 LAYERS += $(TOP)/build/layers/meta-intel
 
-SECURITY_URL = git://git.yoctoproject.org/meta-security
-SECURITY_REL = 31dc4e7532fa7a82060e0b50e5eb8d0414aa7e93
+SECURITY_URL:= git://git.yoctoproject.org/meta-security
+SECURITY_REL:= 31dc4e7532fa7a82060e0b50e5eb8d0414aa7e93
+DEPENDENCIES_SECURITY_REL:=$(shell curl -s https://raw.githubusercontent.com/axxia/meta-intel-axxia/$(AXXIA_REL)/DEPENDENCIES | grep -A4 -w "^meta-security" | tail -1 | cut -d" " -f2)
 LAYERS += $(TOP)/build/layers/meta-security
 LAYERS += $(TOP)/build/layers/meta-security/meta-tpm
 
+ROS_URL:=https://github.com/ros/meta-ros.git
+ROS_REL:=72068b17e4192b51e09c8dc633805a35edac8701
+DEPENDENCIES_ROS_REL:=$(shell curl -s https://raw.githubusercontent.com/axxia/meta-intel-axxia/$(AXXIA_REL)/DEPENDENCIES | grep -A4 -w "^meta-ros" | tail -1 | cut -d" " -f2)
+LAYERS += $(TOP)/build/layers/meta-ros
+
 AXXIA_URL=git@github.com:axxia/meta-intel-axxia.git
-AXXIA_REL=snr_ase_rdk_1905
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-axxia
 LAYERS += $(TOP)/build/layers/meta-intel-axxia/meta-intel-snr
 
@@ -52,13 +63,6 @@ LAYERS += $(TOP)/build/layers/meta-intel-axxia-rdk
 AXXIA_RDK_URL=git@github.com:axxia/meta-intel-axxia-rdk.git
 AXXIA_RDK_KLM=/wr/installs/snr/$(AXXIA_REL)/rdk_klm_src_*xz
 AXXIA_RDK_USER=/wr/installs/snr/$(AXXIA_REL)/rdk_user_src_*xz
-endif
-
-ENABLE_AXXIA_ADK=yes
-ifeq ($(ENABLE_AXXIA_ADK),yes)
-AXXIA_ADK_REL=adk-0.0.6.075_610
-LAYERS += $(TOP)/build/layers/meta-intel-axxia-adknetd
-AXXIA_ADK_LAYER=/wr/installs/snr/$(AXXIA_ADK_REL)/adk_meta-intel-axxia-adknetd*gz
 endif
 
 ENABLE_AXXIA_DPDK=no
@@ -84,7 +88,36 @@ define bitbake-task
 	bitbake $(1) -c $(2)
 endef
 
-all: fs
+all: check-dependencies fs
+
+check-dependencies:
+	@if [ "$(POKY_REL)" != "$(DEPENDENCIES_POKY_REL)" ]; then \
+		printf "Makefile POKY_REL differs from DEPENDENCIES - $(POKY_REL) vs. $(DEPENDENCIES_POKY_REL)\n" ;\
+		DEP_FAILURE=1 ;\
+	fi ;\
+	if [ "$(OE_REL)" != "$(DEPENDENCIES_OE_REL)" ]; then \
+		printf "Makefile OE_REL differs from DEPENDENCIES - $(OE_REL) vs. $(DEPENDENCIES_OE_REL)\n" ;\
+		DEP_FAILURE=1 ;\
+	fi ;\
+	if [ "$(VIRT_REL)" != "$(DEPENDENCIES_VIRT_REL)" ]; then \
+		printf "Makefile OE_REL differs from DEPENDENCIES - $(VIRT_REL) vs. $(DEPENDENCIES_VIRT_REL)\n" ;\
+		DEP_FAILURE=1 ;\
+	fi ;\
+	if [ "$(INTEL_REL)" != "$(DEPENDENCIES_INTEL_REL)" ]; then \
+		printf "Makefile OE_REL differs from DEPENDENCIES - $(INTEL_REL) vs. $(DEPENDENCIES_INTEL_REL)\n" ;\
+		DEP_FAILURE=1 ;\
+	fi ;\
+	if [ "$(SECURITY_REL)" != "$(DEPENDENCIES_SECURITY_REL)" ]; then \
+		printf "Makefile OE_REL differs from DEPENDENCIES - $(SECURITY_REL) vs. $(DEPENDENCIES_SECURITY_REL)\n" ;\
+		DEP_FAILURE=1 ;\
+	fi ;\
+	if [ "$(ROS_REL)" != "$(DEPENDENCIES_ROS_REL)" ]; then \
+		printf "Makefile OE_REL differs from DEPENDENCIES - $(ROS_REL) vs. $(DEPENDENCIES_ROS_REL)\n" ;\
+		DEP_FAILURE=1 ;\
+	fi ;\
+	if [ "$$DEP_FAILURE" != "" ]; then \
+		exit 1 ;\
+	fi
 
 $(TOP)/build/poky:
 
@@ -106,6 +139,10 @@ $(TOP)/build/layers/meta-security:
 	git -C $(TOP)/build/layers clone $(SECURITY_URL) $@
 	git -C $@ checkout $(SECURITY_REL)
 
+$(TOP)/build/layers/meta-ros:
+	git -C $(TOP)/build/layers clone $(ROS_URL) $@
+	git -C $@ checkout $(ROS_REL)
+
 $(TOP)/build/layers/meta-intel-axxia:
 	git -C $(TOP)/build/layers clone $(AXXIA_URL) $@
 	git -C $@ checkout $(AXXIA_REL)
@@ -122,9 +159,6 @@ $(TOP)/build/layers/meta-intel-axxia-rdk:
 	cp $(AXXIA_RDK_USER) $@/downloads/rdk_user_src.tar.xz
 	mkdir -p $@/downloads/unpacked
 	tar -C $@/downloads/unpacked -xf $(AXXIA_RDK_KLM)
-
-$(TOP)/build/layers/meta-intel-axxia-adknetd:
-	tar -C $(TOP)/build/layers -xf $(AXXIA_ADK_LAYER)
 endif
 
 .PHONY: extract-kernel-patches
@@ -133,12 +167,10 @@ extract-kernel-patches:
 ifeq ($(ENABLE_AXXIA_RDK),yes)
 	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch -o $(TOP)/build/extracted-kernel-patches before_rdk_commits..after_rdk_commits
 endif
-ifeq ($(ENABLE_AXXIA_ADK),yes)
-	git -C build/build/tmp/work-shared/axxiax86-64/kernel-source format-patch --start-number 1000 -o $(TOP)/build/extracted-kernel-patches before_adknetd_commits..after_adknetd_commits
-endif
 
 ifeq ($(ENABLE_AXXIA_DPDK),yes)
 endif
+
 # create wrlinux platform
 .PHONY: build
 build:
