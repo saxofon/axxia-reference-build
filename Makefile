@@ -15,7 +15,8 @@ endif
 RM = $(Q)rm -f
 
 AXXIA_SUPPORT_URL := git@github.com:axxia/axxia_support.git
-AXXIA_SUPPORT_REL := snr_rdk_2001
+AXXIA_SUPPORT_REL := snr_ase_rdk_2101
+AXXIA_DELIVERY_REL := snr_rdk_2101
 
 MOPTS += INCLUDE_SIMICSFS=false
 
@@ -30,10 +31,10 @@ $(TOP)/build/axxia_support:
 	git -C $(TOP)/build/axxia_support checkout $(AXXIA_SUPPORT_REL)
 
 $(TOP)/build/axxia_support/yocto_build/rdk_klm_src.txz:
-	cd $(TOP)/build/axxia_support/yocto_build && ln -s $(shell ls /wr/installs/snr/$(AXXIA_SUPPORT_REL)/rdk_klm_src_*txz) rdk_klm_src.txz
+	cd $(TOP)/build/axxia_support/yocto_build && ln -s $(shell ls /wr/installs/snr/$(AXXIA_DELIVERY_REL)/rdk_klm_src_*txz) rdk_klm_src.txz
 
 $(TOP)/build/axxia_support/yocto_build/rdk_user_src.txz:
-	cd $(TOP)/build/axxia_support/yocto_build && ln -s $(shell ls /wr/installs/snr/$(AXXIA_SUPPORT_REL)/rdk_user_src_*txz) rdk_user_src.txz
+	cd $(TOP)/build/axxia_support/yocto_build && ln -s $(shell ls /wr/installs/snr/$(AXXIA_DELIVERY_REL)/rdk_user_src_*txz) rdk_user_src.txz
 
 $(TOP)/build/axxia_support/yocto_build/axxia/tmp/work-shared/axxiax86-64/kernel-source: $(TOP)/build/axxia_support $(TOP)/build/axxia_support/yocto_build/rdk_klm_src.txz $(TOP)/build/axxia_support/yocto_build/rdk_user_src.txz
 	cd $(TOP)/build/axxia_support/yocto_build && make $(MOPTS) fs
