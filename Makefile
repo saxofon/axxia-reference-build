@@ -15,8 +15,8 @@ endif
 RM = $(Q)rm -f
 
 AXXIA_SUPPORT_URL := git@github.com:axxia/axxia_support.git
-AXXIA_SUPPORT_REL := snr_rdk_2101.01
-AXXIA_DELIVERY_REL := snr_rdk_2101.01
+AXXIA_SUPPORT_REL := snr_rdk_2101.03
+AXXIA_DELIVERY_REL := snr_rdk_2101.03
 
 MOPTS += INCLUDE_SIMICSFS=false
 
