@@ -19,7 +19,7 @@ AXXIA_SUPPORT_URL := /wr/installs/repo_mirrors/github.com/axxia/axxia_support.gi
 else
 AXXIA_SUPPORT_URL := git@github.com:axxia/axxia_support.git
 endif
-AXXIA_SUPPORT_REL := snr_rdk_2101.03
+AXXIA_SUPPORT_REL := snr_rdk_2101.03_linux510
 AXXIA_DELIVERY_REL := snr_rdk_2101.03
 
 MOPTS += INCLUDE_SIMICSFS=false
