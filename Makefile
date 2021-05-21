@@ -14,7 +14,11 @@ endif
 
 RM = $(Q)rm -f
 
+ifneq ("$(JENKINS_URL)","")
+AXXIA_SUPPORT_URL := /wr/installs/repo_mirrors/github.com/axxia/axxia_support.git
+else
 AXXIA_SUPPORT_URL := git@github.com:axxia/axxia_support.git
+endif
 AXXIA_SUPPORT_REL := snr_rdk_2101.03
 AXXIA_DELIVERY_REL := snr_rdk_2101.03
 
