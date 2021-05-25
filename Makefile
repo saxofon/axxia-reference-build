@@ -27,6 +27,7 @@ MOPTS += INCLUDE_SIMICSFS=false
 all: check-dependencies extract-kernel-patches
 
 check-dependencies:
+	locale
 
 .PHONY: build
 $(TOP)/build/axxia_support:
@@ -41,7 +42,7 @@ $(TOP)/build/axxia_support/yocto_build/rdk_user_src.txz:
 	cd $(TOP)/build/axxia_support/yocto_build && ln -s $(shell ls /wr/installs/snr/$(AXXIA_DELIVERY_REL)/rdk_user_src_*txz) rdk_user_src.txz
 
 $(TOP)/build/axxia_support/yocto_build/axxia/tmp/work-shared/axxiax86-64/kernel-source urf: $(TOP)/build/axxia_support $(TOP)/build/axxia_support/yocto_build/rdk_klm_src.txz $(TOP)/build/axxia_support/yocto_build/rdk_user_src.txz
-	cd $(TOP)/build/axxia_support/yocto_build && make $(MOPTS) fs
+	cd $(TOP)/build/axxia_support/yocto_build && LANG=en_US.UTF-8 make $(MOPTS) fs
 
 .PHONY: extract-kernel-patches
 extract-kernel-patches: $(TOP)/build/axxia_support/yocto_build/axxia/tmp/work-shared/axxiax86-64/kernel-source
