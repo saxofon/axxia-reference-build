@@ -25,8 +25,8 @@ RM = $(Q)rm -f
 
 PLF := grr
 AXXIA_SUPPORT_URL := git@github.com:axxia/axxia_support.git
-AXXIA_SUPPORT_REL := grr_ase_rdk_del7
-AXXIA_DELIVERY_REL := grr_ase_rdk_del7
+AXXIA_SUPPORT_REL := grr_ase_rdk_del8
+AXXIA_DELIVERY_REL := grr_ase_rdk_del8
 
 MOPTS += INCLUDE_SIMICSFS=false
 MOPTS += RDK_KLM_ARCHIVE=$(shell basename $(shell ls /wr/installs/grr/$(AXXIA_DELIVERY_REL)/rdk_klm_src_*txz))
